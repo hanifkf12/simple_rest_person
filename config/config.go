@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"hanif.com/coba/structs"
 )
 
 func DBInit() *gorm.DB {
@@ -13,5 +14,6 @@ func DBInit() *gorm.DB {
 		fmt.Print(err)
 		panic("failed to connect to database")
 	}
+	db.AutoMigrate(structs.Person{})
 	return db
 }
