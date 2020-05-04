@@ -6,6 +6,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"hanif.com/coba/config"
 	"hanif.com/coba/controllers"
+	"os"
 )
 
 func main() {
@@ -13,11 +14,16 @@ func main() {
 	inDB := &controllers.InDB{DB: db}
 	defer db.Close()
 	router := gin.Default()
+	port := os.Getenv("PORT")
 
+	if port == "" {
+		port = "3333"
+	}
+	gin.SetMode(gin.ReleaseMode)
 	router.GET("/person/:id", inDB.GetPerson)
 	router.GET("/persons", inDB.GetPersons)
 	router.POST("/person", inDB.CreatePerson)
 	router.PUT("/person/:id", inDB.UpdatePerson)
 	router.DELETE("/person/:id", inDB.DeletePerson)
-	router.Run(":3333")
+	router.Run(":" + port)
 }
