@@ -6,6 +6,6 @@ import (
 
 type Person struct {
 	gorm.Model
-	First_Name string `json:"first_name"`
-	Last_Name string `json:"last_name"`
+	First_Name string `form:"first_name" json:"first_name"`
+	Last_Name  string `form:"last_name" json:"last_name"`
 }

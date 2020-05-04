@@ -1,27 +1,28 @@
 package controllers
 
 import (
-	"../structs"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"hanif.com/coba/structs"
 	"net/http"
 )
-func (idb *InDB) GetPerson(c *gin.Context)  {
+
+func (idb *InDB) GetPerson(c *gin.Context) {
 	var (
 		person structs.Person
 		result gin.H
 	)
 	token := c.Request.Header.Get("Authorization")
-	fmt.Print("token nya",token)
+	fmt.Print("token nya", token)
 	id := c.Param("id")
 	//err := idb.DB.Where("id = ?", id).First(&person).Error
 	err := idb.DB.First(&person, id).Error
 	if err != nil {
 		result = gin.H{
-			"result": err.Error()+" with id "+id,
-			"count": 0,
+			"result": err.Error() + " with id " + id,
+			"count":  0,
 		}
-	}else {
+	} else {
 		result = gin.H{
 			"result": person,
 			"count":  1,
@@ -30,35 +31,35 @@ func (idb *InDB) GetPerson(c *gin.Context)  {
 	c.JSON(http.StatusOK, result)
 }
 
-func (idb *InDB) GetPersons(c *gin.Context){
+func (idb *InDB) GetPersons(c *gin.Context) {
 	var (
 		persons []structs.Person
-		result gin.H
+		result  gin.H
 	)
-	idb.DB.Find(&persons)
+	idb.DB.Order("id").Find(&persons)
 	if len(persons) <= 0 {
 		result = gin.H{
 			"result": nil,
-			"count": 0,
+			"count":  0,
 		}
-	}else {
+	} else {
 		result = gin.H{
 			"result": persons,
-			"count": len(persons),
+			"count":  len(persons),
 		}
 	}
 	c.JSON(http.StatusOK, result)
 }
 
-func (idb *InDB) CreatePerson(c *gin.Context){
+func (idb *InDB) CreatePerson(c *gin.Context) {
 	var (
 		person structs.Person
 		result gin.H
 	)
-	first_name := c.PostForm("first_name")
-	last_name := c.PostForm("last_name")
-	person.First_Name = first_name
-	person.Last_Name = last_name
+	err := c.ShouldBind(&person)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
 	idb.DB.Create(&person)
 	result = gin.H{
 		"result": person,
@@ -66,14 +67,12 @@ func (idb *InDB) CreatePerson(c *gin.Context){
 	c.JSON(http.StatusCreated, result)
 }
 
-func (idb *InDB) UpdatePerson(c *gin.Context){
+func (idb *InDB) UpdatePerson(c *gin.Context) {
 	id := c.Param("id")
-	first_name := c.PostForm("first_name")
-	last_name := c.PostForm("last_name")
-	var(
-		person structs.Person
+	var (
+		person    structs.Person
 		newPerson structs.Person
-		result gin.H
+		result    gin.H
 	)
 
 	err := idb.DB.First(&person, id).Error
@@ -82,17 +81,16 @@ func (idb *InDB) UpdatePerson(c *gin.Context){
 			"result": "data not found",
 		}
 	}
-	newPerson.First_Name = first_name
-	newPerson.Last_Name = last_name
+	e := c.ShouldBind(&newPerson)
 	err = idb.DB.Model(&person).Updates(newPerson).Error
-	if err != nil {
+	if err != nil || e != nil {
 		result = gin.H{
 			"result": "update failed",
 		}
 	} else {
 		result = gin.H{
 			"result": "successfully updated data",
-			"data": person,
+			"data":   person,
 		}
 	}
 	c.JSON(http.StatusOK, result)
@@ -105,6 +103,7 @@ func (idb *InDB) DeletePerson(c *gin.Context) {
 	)
 	id := c.Param("id")
 	err := idb.DB.First(&person, id).Error
+	fmt.Println(person.First_Name, person.Last_Name)
 	if err != nil {
 		result = gin.H{
 			"result": "data not found",
