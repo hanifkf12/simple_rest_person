@@ -80,6 +80,8 @@ func (idb *InDB) UpdatePerson(c *gin.Context) {
 		result = gin.H{
 			"result": "data not found",
 		}
+		c.JSON(http.StatusOK, result)
+		return
 	}
 	e := c.ShouldBind(&newPerson)
 	err = idb.DB.Model(&person).Updates(newPerson).Error
@@ -87,6 +89,8 @@ func (idb *InDB) UpdatePerson(c *gin.Context) {
 		result = gin.H{
 			"result": "update failed",
 		}
+		c.JSON(http.StatusOK, result)
+		return
 	} else {
 		result = gin.H{
 			"result": "successfully updated data",
@@ -108,12 +112,16 @@ func (idb *InDB) DeletePerson(c *gin.Context) {
 		result = gin.H{
 			"result": "data not found",
 		}
+		c.JSON(http.StatusOK, result)
+		return
 	}
 	err = idb.DB.Delete(&person).Error
 	if err != nil {
 		result = gin.H{
 			"result": "delete failed",
 		}
+		c.JSON(http.StatusOK, result)
+		return
 	} else {
 		result = gin.H{
 			"result": "Data deleted successfully",
